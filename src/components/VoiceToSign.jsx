@@ -18,7 +18,7 @@ export default function VoiceToSign() {
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('🎤 Speech recognition not supported. Use Chrome browser.');
+      alert('🎤 Speech recognition not supported. Please use Chrome.');
       return;
     }
 
@@ -35,7 +35,7 @@ export default function VoiceToSign() {
     };
 
     recognition.onresult = (event) => {
-      const text = event.results[0][0].transcript.toLowerCase();
+      const text = event.results[0][0].transcript.toLowerCase().trim();
       setTranscript(text);
       findSignImages(text);
       setIsLoading(false);
@@ -45,7 +45,7 @@ export default function VoiceToSign() {
       console.error('Speech error:', event.error);
       setIsListening(false);
       setIsLoading(false);
-      alert('Speech recognition failed. Try again.');
+      alert('Speech recognition failed. Please try again.');
     };
 
     recognition.onend = () => {
@@ -79,72 +79,138 @@ export default function VoiceToSign() {
       .filter(Boolean);
 
     if (foundImages.length === 0) {
-      setSignImages([{ word: "No sign found 😢", image: "https://via.placeholder.com/400x400/6c757e/ffffff?text=No+Match" }]);
+      setSignImages([{ 
+        word: "No matching sign found", 
+        image: "https://via.placeholder.com/400x400/27272a/ffffff?text=No+Match" 
+      }]);
     } else {
       setSignImages(foundImages);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 flex flex-col items-center justify-center p-8 text-white">
-      <div className="max-w-2xl w-full space-y-8">
+    <div className="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center p-6 md:p-12 overflow-hidden">
+      <div className="max-w-3xl w-full mx-auto space-y-16">
+        {/* Header */}
         <div className="text-center">
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-pink-400 to-orange-400 bg-clip-text text-transparent">
-            🎤 Voice to Sign Language
+          <div className="inline-flex items-center gap-3 mb-6">
+            <div className="w-3 h-3 rounded-full bg-[#e99b63] animate-pulse" />
+            <span className="uppercase tracking-[0.125em] text-xs font-medium text-zinc-400">WeSign • Real-time</span>
+          </div>
+          
+          <h1 className="text-5xl md:text-6xl font-semibold tracking-[-0.03em] leading-none mb-4">
+            Voice to Sign
           </h1>
-          <p className="text-xl text-gray-300 mb-8">Speak Tagalog → See FSL signs instantly!</p>
+          <p className="text-xl md:text-2xl text-zinc-400 tracking-wide max-w-md mx-auto">
+            Speak Tagalog.<br />Watch FSL signs appear instantly.
+          </p>
         </div>
 
-        <div className="flex flex-col items-center space-y-6">
+        {/* Microphone Button */}
+        <div className="flex justify-center">
           <button
             onClick={isListening ? stopListening : startListening}
             disabled={isLoading}
-            className="w-28 h-28 rounded-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 shadow-2xl hover:shadow-pink-500/50 transition-all duration-300 flex items-center justify-center text-white text-3xl font-bold transform hover:scale-110 active:scale-95 border-4 border-white/20"
+            className="group relative w-40 h-40 md:w-44 md:h-44 flex items-center justify-center rounded-full transition-all duration-500 active:scale-95 hover:scale-105 focus:outline-none"
           >
-            {isLoading ? (
-              <span>⏳</span>
-            ) : isListening ? (
-              <span>⏹️</span>
-            ) : (
-              <span>🎤</span>
+            {/* Outer glow ring */}
+            <div className="absolute inset-0 rounded-full border border-[#e99b63]/20" />
+            
+            {/* Pulsing ring when listening */}
+            {isListening && (
+              <>
+                <div className="absolute inset-0 rounded-full border-4 border-[#e99b63] animate-ping opacity-30" />
+                <div className="absolute inset-2 rounded-full border border-[#e99b63]/40" />
+              </>
             )}
+
+            {/* Button face */}
+            <div className={`relative w-36 h-36 md:w-40 md:h-40 rounded-full flex items-center justify-center border-4 transition-all duration-300 overflow-hidden
+              ${isListening 
+                ? 'bg-red-500/10 border-red-400/50 shadow-[0_0_80px_-10px] shadow-red-500' 
+                : 'bg-zinc-900 border-[#e99b63]/30 hover:border-[#e99b63] shadow-[0_0_70px_-15px] shadow-[#e99b63]'
+              }`}
+            >
+              {isLoading ? (
+                <div className="w-8 h-8 border-4 border-zinc-400 border-t-transparent rounded-full animate-spin" />
+              ) : isListening ? (
+                <span className="text-6xl text-red-400">⏹︎</span>
+              ) : (
+                <span className="text-7xl text-[#e99b63] transition-transform group-hover:scale-110">🎤</span>
+              )}
+            </div>
           </button>
+        </div>
 
-          {transcript && (
-            <div className="bg-black/50 backdrop-blur-sm rounded-2xl p-6 text-center max-w-md mx-auto border border-white/20">
-              <p className="text-lg font-semibold mb-4 text-blue-300">🎧 Heard:</p>
-              <p className="text-2xl bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent font-semibold">
-                "{transcript}"
-              </p>
-            </div>
+        {/* Status */}
+        <div className="text-center">
+          {isListening && (
+            <p className="text-[#e99b63] text-sm uppercase tracking-[0.125em] font-medium animate-pulse">
+              Listening… Speak now
+            </p>
           )}
-
-          {signImages.length > 0 && (
-            <div className="space-y-6 w-full">
-              <p className="text-center font-bold text-xl text-green-400">✨ Sign Language Results:</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {signImages.map((sign, index) => (
-                  <div key={index} className="flex flex-col items-center p-6 bg-black/40 rounded-2xl backdrop-blur-sm border border-white/20 hover:scale-105 transition-all">
-                    <img 
-                      src={sign.image} 
-                      alt={sign.word}
-                      className="w-48 h-48 md:w-64 md:h-64 object-contain rounded-xl shadow-2xl border-4 border-white/30"
-                      onError={(e) => {
-                        e.target.src = "https://via.placeholder.com/400x400/gray/ffffff?text=Image+Error";
-                      }}
-                    />
-                    <p className="mt-4 font-bold text-xl capitalize text-center px-4 min-h-[2rem]">
-                      {sign.word.toUpperCase()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {isLoading && !isListening && (
+            <p className="text-zinc-400 text-sm">Processing your voice…</p>
           )}
         </div>
 
-        <div className="text-center text-lg text-gray-300 bg-black/30 rounded-xl p-4">
-          💡 Try: "kamusta ka", "salamat po", "magandang umaga"
+        {/* Transcript */}
+        {transcript && (
+          <div className="bg-zinc-900/70 backdrop-blur-2xl border border-zinc-800 rounded-3xl p-9 text-center transition-all">
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <div className="text-[#e99b63]">🎧</div>
+              <span className="uppercase text-xs tracking-[0.2em] font-medium text-zinc-500">Heard clearly</span>
+            </div>
+            <p className="text-3xl md:text-4xl font-medium text-white tracking-wide leading-tight">
+              “{transcript}”
+            </p>
+          </div>
+        )}
+
+        {/* Sign Results */}
+        {signImages.length > 0 && (
+          <div className="space-y-10">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold tracking-tight">Your Signs</h2>
+              <div className="text-xs uppercase tracking-widest text-zinc-500">Filipino Sign Language</div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {signImages.map((sign, index) => (
+                <div 
+                  key={index}
+                  className="group bg-zinc-900 border border-zinc-800 hover:border-[#e99b63]/30 rounded-3xl overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[#e99b63]/10"
+                >
+                  <div className="aspect-square bg-black flex items-center justify-center p-8">
+                    <img 
+                      src={sign.image} 
+                      alt={sign.word}
+                      className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        e.target.src = "https://via.placeholder.com/400x400/27272a/ffffff?text=Sign+Unavailable";
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="p-8 text-center">
+                    <p className="text-2xl font-semibold uppercase tracking-widest text-white">
+                      {sign.word}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Hint */}
+        <div className="pt-8 border-t border-zinc-800 text-center">
+          <p className="text-zinc-500 text-sm tracking-wide">
+            Try saying: <span className="text-[#e99b63] font-medium">"kamusta ka"</span> •{" "}
+            <span className="text-[#e99b63] font-medium">"salamat po"</span> •{" "}
+            <span className="text-[#e99b63] font-medium">"magandang umaga"</span>
+          </p>
+          <p className="text-[10px] text-zinc-600 mt-6">Works best in Chrome • Filipino language only</p>
         </div>
       </div>
     </div>
