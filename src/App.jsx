@@ -11,6 +11,7 @@ import Tutorials from "./components/Tutorials";
 import Quizzes from "./components/Quizzes";
 import Progress from "./components/Progress";
 import RequireAuth from "./components/RequireAuth";
+import VoiceToSign from "./components/VoiceToSign"; 
 
 export default function App() {
   useEffect(() => {
@@ -29,19 +30,22 @@ export default function App() {
         
         <Header />
         
-        {/* Routes */}
-       <Routes>
-  <Route path="/" element={<Hero />} />
-  <Route path="/real-time-detection" element={<RealTimeDetection />} />
-  <Route path="/login" element={<Login />} />
-  <Route path="/register" element={<Register />} />
-  <Route element={<RequireAuth />}>
-    <Route path="/tutorials" element={<Tutorials />} />
-    <Route path="/quizzes" element={<Quizzes />} />
-    <Route path="/progress" element={<Progress />} />
-  </Route>
-</Routes>
-
+        {/* ✅ FIXED ROUTES */}
+        <Routes>
+          <Route path="/" element={<Hero />} />
+          <Route path="/real-time-detection" element={<RealTimeDetection />} />
+          
+          {/* 🔥 ADD THIS VOICE ROUTE */}
+          <Route path="/voice-to-sign" element={<VoiceToSign />} />
+          
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route element={<RequireAuth />}>
+            <Route path="/tutorials" element={<Tutorials />} />
+            <Route path="/quizzes" element={<Quizzes />} />
+            <Route path="/progress" element={<Progress />} />
+          </Route>
+        </Routes>
       </main>
     </Router>
   );

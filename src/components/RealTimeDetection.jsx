@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Holistic,
   POSE_CONNECTIONS,
@@ -7,8 +8,9 @@ import {
 } from "@mediapipe/holistic";
 import { drawConnectors, drawLandmarks } from "@mediapipe/drawing_utils";
 import { Camera } from "@mediapipe/camera_utils";
+import VoiceToSign from "./VoiceToSign"; // ADD THIS LINE
 
-// ✅ Custom Styles
+// ✅ Custom Styles (YOUR EXISTING STYLES + VOICE BUTTON)
 const style = document.createElement("style");
 style.innerHTML = `
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
@@ -20,18 +22,45 @@ style.innerHTML = `
   .animate-glow {
     animation: pulse-glow 1.5s infinite ease-in-out;
   }
+  /* VOICE TO SIGN BUTTON - BOTTOM RIGHT */
+  .voice-to-sign-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    animation: pulse-glow 2s infinite;
+  }
+  .voice-to-sign-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 15px 40px rgba(255, 107, 107, 0.6);
+  }
 `;
 document.head.appendChild(style);
 
 export default function RealTimeDetection() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const navigate = useNavigate();
   const [prediction, setPrediction] = useState("Initializing...");
   const [confidence, setConfidence] = useState(0);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [sending, setSending] = useState(false);
+  const [showVoiceToSign, setShowVoiceToSign] = useState(false); // ADD THIS STATE
 
-  // Reset backend
+  // Reset backend (YOUR EXISTING FUNCTION)
   const handleNewSign = async () => {
     try {
       await fetch("http://127.0.0.1:5000/reset", { method: "POST" });
@@ -43,6 +72,17 @@ export default function RealTimeDetection() {
     }
   };
 
+  // VOICE BUTTON CLICK HANDLER - ADD THIS FUNCTION
+  const handleVoiceClick = () => {
+    setShowVoiceToSign(true); // Shows VoiceToSign component
+  };
+
+  // BACK TO CAMERA BUTTON - ADD THIS FUNCTION
+  const goBackToCamera = () => {
+    setShowVoiceToSign(false);
+  };
+
+  // YOUR EXISTING useEffect (NO CHANGES NEEDED)
   useEffect(() => {
     let holistic = null;
     let camera = null;
@@ -55,7 +95,6 @@ export default function RealTimeDetection() {
       canvasCtx.clearRect(0, 0, 640, 480);
       canvasCtx.drawImage(results.image, 0, 0, 640, 480);
 
-      // Pose
       if (results.poseLandmarks) {
         drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
           color: "#00FF00",
@@ -67,7 +106,6 @@ export default function RealTimeDetection() {
         });
       }
 
-      // Hands
       if (results.leftHandLandmarks) {
         drawConnectors(canvasCtx, results.leftHandLandmarks, HAND_CONNECTIONS, {
           color: "#FF0000",
@@ -89,7 +127,6 @@ export default function RealTimeDetection() {
         });
       }
 
-      // Face
       if (results.faceLandmarks) {
         drawConnectors(canvasCtx, results.faceLandmarks, FACEMESH_TESSELATION, {
           color: "#FFFFFF",
@@ -129,7 +166,6 @@ export default function RealTimeDetection() {
       setIsCameraReady(true);
       setPrediction("Collecting frames...");
 
-      // Start sending to backend
       sendInterval = setInterval(() => {
         if (sending || stopped) return;
         setSending(true);
@@ -174,7 +210,6 @@ export default function RealTimeDetection() {
 
     initHolistic();
 
-    // Cleanup when leaving detection page
     return () => {
       stopped = true;
       if (sendInterval) clearInterval(sendInterval);
@@ -183,7 +218,25 @@ export default function RealTimeDetection() {
       setIsCameraReady(false);
       console.log("🛑 Camera + Holistic stopped cleanly.");
     };
-  }, []); // reinitialize when page mounts again
+  }, []);
+
+  // MAIN RENDER - YOUR EXISTING UI + VOICE BUTTON
+  if (showVoiceToSign) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-white p-8">
+        <div className="flex items-center mb-8">
+          <button
+            onClick={goBackToCamera}
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl font-semibold transition mr-4"
+          >
+            ← Back to Camera
+          </button>
+          <h1 className="text-3xl font-bold">🎤 Voice to Sign Language</h1>
+        </div>
+        <VoiceToSign />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white">
@@ -233,6 +286,14 @@ export default function RealTimeDetection() {
       >
         🔄 New Sign
       </button>
+
+     <button
+  onClick={() => navigate('/voice-to-sign')}
+  className="voice-to-sign-btn"
+  title="Voice to Sign Language"
+>
+  🎤
+</button>
     </div>
   );
 }
