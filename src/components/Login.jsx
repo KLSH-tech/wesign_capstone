@@ -92,7 +92,7 @@ export default function Login() {
                             <label className="text-sm cursor-pointer" htmlFor="checkbox">Remember me</label>
                         </div>
                         <Link to="/forgot-password" className="text-sm hover:text-[#e99b63] transition-colors">
-                            Forgot password?
+                            Nakalimutan ang password?
                         </Link>
                     </div>
                     {/* Login Button */}
@@ -100,13 +100,13 @@ export default function Login() {
                         type="submit" 
                         className="mt-8 w-full h-11 rounded-full text-black font-medium bg-[#a7a7a7] hover:bg-white transition-all duration-300"
                     >
-                        Login
+                        Mag-login
                     </button>
                     {/* Sign Up Link */}
                     <p className="text-gray-400 text-sm mt-4">
-                        Don't have an account? {" "}
+                        Wala pang account? {" "}
                         <Link to="/register" className="text-[#e99b63] hover:text-[#d88952] hover:underline transition-colors">
-                            Sign up
+                            Mag-sign up
                         </Link>
                     </p>
                 </form>

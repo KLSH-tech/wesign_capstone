@@ -26,7 +26,7 @@ const Hero = () => {
         </h1>
 
         <p className="text-base sm:text-lg tracking-wider text-gray-400 max-w-[25rem] lg:max-w-[30rem] mb-10">
-          Learn sign language with real-time AI detection. Practice anywhere, get instant feedback, master communication, and connect confidently. Start free today
+          Matuto ng Sign Language gamit ang makabagong teknolohiya. Magpraktis kahit saan, kahit kailan. Libre at madaling gamitin.
         </p>
 
         {/* CTA Buttons */}
